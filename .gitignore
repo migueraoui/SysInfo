@@ -1,0 +1,20 @@
+# Dépendances et sorties de build
+node_modules/
+dist/
+.astro/
+
+# Documents privés (fiches, corrigés, sources LaTeX) — NE JAMAIS COMMITER
+private/
+*.zip
+*.rar
+
+# Outils de vérification locaux
+.screenshots/
+.lighthouse/
+
+# Divers
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
