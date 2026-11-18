@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SeanceCard from '../../components/SeanceCard.astro';
+import Button from '../../components/Button.astro';
+import { getChapitres, getSeances } from '../../lib/content';
+import { url } from '../../lib/url';
+import { MODULE } from '../../site.config';
+
+const seances = await getSeances();
+const chapitres = await getChapitres();
+const publiees = seances.filter((s) => s.publiee).length;
+const groups = chapitres
+  .map((c) => ({ ...c, seances: seances.filter((s) => s.chapitre === c.numero) }))
+  .filter((g) => g.seances.length > 0);
+---
+
+<BaseLayout
+  title="Séances"
+  description={`Les ${seances.length} séances du module ${MODULE.nom} (${MODULE.niveauCourt}, ${MODULE.semestre}) : cours et TD à consulter et télécharger.`}
+>
+  <header class="container page-head">
+    <p class="eyebrow">{MODULE.nom}</p>
+    <h1>Séances</h1>
+    <p class="lead">
+      {publiees} séance{publiees > 1 ? 's' : ''} publiée{publiees > 1 ? 's' : ''} sur {seances.length}. Chaque séance
+      regroupe le cours et le TD correspondants.
+    </p>
+    <div class="switch">
+      <Button href={url('/cours/')} icon="book">Tous les cours</Button>
+      <Button href={url('/td/')} icon="pencil">Tous les TD</Button>
+    </div>
+  </header>
+
+  {
+    groups.map((g) => (
+      <section class="container section chap" aria-labelledby={`chap-${g.numero}`}>
+        <div class="section-head">
+          <h2 id={`chap-${g.numero}`}>
+            <span class="chap__num">Chapitre {g.numero}</span>
+            {g.titre}
+          </h2>
+        </div>
+        <ul class="grid-cards" role="list">
+          {g.seances.map((s) => (
+            <li>
+              <SeanceCard seance={s} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</BaseLayout>
+
+<style>
+  .switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .chap {
+    padding-block: 1.25rem;
+  }
+  .chap h2 {
+    font-size: 1.1875rem;
+  }
+  .chap__num {
+    display: block;
+    margin-bottom: 0.125rem;
+    color: var(--accent-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+</style>

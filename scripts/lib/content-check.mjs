@@ -86,9 +86,8 @@ export function checkContent() {
     if (!Number.isInteger(data.chapitre) || !chapitreNums.has(data.chapitre)) {
       errors.push(`${where} : chapitre ${data.chapitre} absent de src/content/chapitres.json`);
     }
-    for (const key of ['titre', 'resume']) {
-      if (typeof data[key] !== 'string' || data[key].trim().length < 3) errors.push(`${where} : « ${key} » manquant`);
-    }
+    if (typeof data.titre !== 'string' || data.titre.trim().length < 3) errors.push(`${where} : « titre » manquant`);
+    if (data.resume !== undefined && typeof data.resume !== 'string') errors.push(`${where} : « resume » doit être un texte`);
     if (!Array.isArray(data.documents)) {
       errors.push(`${where} : « documents » doit être un tableau (vide si la séance est à venir)`);
       continue;

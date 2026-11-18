@@ -1,29 +1,260 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Badge from '../components/Badge.astro';
 import Button from '../components/Button.astro';
-import Card from '../components/Card.astro';
+import DocumentCard from '../components/DocumentCard.astro';
+import SeanceCard from '../components/SeanceCard.astro';
+import Progress from '../components/Progress.astro';
+import AnnonceList from '../components/AnnonceList.astro';
+import Icon from '../components/Icon.astro';
+import { getAllDocuments, getAnnonces, getSeances } from '../lib/content';
 import { url } from '../lib/url';
+import { pluralize } from '../lib/format';
+import { MODULE } from '../site.config';
+
+const seances = await getSeances();
+const docs = await getAllDocuments();
+const recent = docs.slice(0, 3);
+const annonces = (await getAnnonces()).slice(0, 3);
+const nbCours = docs.filter((d) => d.type === 'cours').length;
+const nbTd = docs.filter((d) => d.type === 'td').length;
 ---
 
 <BaseLayout>
-  <section class="container page-head">
-    <p class="eyebrow">En construction</p>
-    <h1>Systèmes d'information</h1>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <p class="hero__eyebrow">{MODULE.niveau} · {MODULE.semestre} · {MODULE.annee}</p>
+        <h1 id="hero-title">{MODULE.nom}</h1>
+        <p class="hero__org">
+          {MODULE.institution}<br />{MODULE.departement}
+        </p>
+        <ul class="hero__facts" role="list">
+          <li>{MODULE.credits} crédits</li>
+          <li>Coefficient {MODULE.coefficient}</li>
+          <li>Examen {MODULE.evaluation.examen} % · Contrôle continu {MODULE.evaluation.controleContinu} %</li>
+        </ul>
+        <div class="hero__cta">
+          <Button href={url('/seances/')} variant="light" iconAfter="arrow-right">Voir les séances</Button>
+          <Button href={url('/programme/')} variant="outline-light">Programme</Button>
+        </div>
+      </div>
+      <div class="hero__progress">
+        <h2 class="sr-only">Avancement</h2>
+        <Progress seances={seances} />
+      </div>
+    </div>
   </section>
-  <section class="container section">
-    <Card>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
-        <Badge variant="cours">Cours</Badge>
-        <Badge variant="td">TD</Badge>
-        <Badge variant="corrige">Corrigé</Badge>
-        <Badge variant="soon">À venir</Badge>
-      </div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <Button href={url('/')} variant="primary" icon="external">Ouvrir</Button>
-        <Button href={url('/')} icon="download">Télécharger</Button>
-        <Button icon="share" data-share>Partager</Button>
-      </div>
-    </Card>
+
+  <nav class="container quick" aria-label="Accès rapide">
+    <ul role="list">
+      <li>
+        <a href={url('/cours/')}>
+          <span class="quick__icon quick__icon--cours"><Icon name="book" size={20} /></span>
+          <span><strong>Cours</strong><small>{pluralize(nbCours, 'publié', 'publiés')}</small></span>
+        </a>
+      </li>
+      <li>
+        <a href={url('/td/')}>
+          <span class="quick__icon quick__icon--td"><Icon name="pencil" size={20} /></span>
+          <span><strong>TD</strong><small>{pluralize(nbTd, 'publié', 'publiés')}</small></span>
+        </a>
+      </li>
+      <li>
+        <a href={url('/programme/')}>
+          <span class="quick__icon"><Icon name="list" size={20} /></span>
+          <span><strong>Programme</strong><small>Canevas officiel</small></span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  {
+    annonces.length > 0 && (
+      <section class="container section" aria-labelledby="annonces-title">
+        <div class="section-head">
+          <h2 id="annonces-title">Annonces</h2>
+        </div>
+        <AnnonceList annonces={annonces} />
+      </section>
+    )
+  }
+
+  <section class="container section" aria-labelledby="recent-title">
+    <div class="section-head">
+      <h2 id="recent-title">Dernières publications</h2>
+    </div>
+    {
+      recent.length > 0 ? (
+        <ul class="grid-cards" role="list">
+          {recent.map((doc) => (
+            <li>
+              <DocumentCard doc={doc} showSeance />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">Aucun document n'est encore publié. Revenez bientôt !</p>
+      )
+    }
+  </section>
+
+  <section class="container section" aria-labelledby="seances-title">
+    <div class="section-head">
+      <h2 id="seances-title">Séances</h2>
+      <a href={url('/seances/')} class="more">Toutes les séances <Icon name="arrow-right" size={16} /></a>
+    </div>
+    <ul class="grid-cards" role="list">
+      {
+        seances.map((s) => (
+          <li>
+            <SeanceCard seance={s} />
+          </li>
+        ))
+      }
+    </ul>
   </section>
 </BaseLayout>
+
+<style>
+  .hero {
+    background: var(--hero-bg);
+    color: var(--hero-text);
+  }
+  .hero__inner {
+    display: grid;
+    gap: 1.75rem;
+    padding-block: 2rem 2.25rem;
+  }
+  .hero h1 {
+    color: #ffffff;
+    font-size: clamp(2rem, 1.4rem + 3vw, 3.25rem);
+    letter-spacing: -0.025em;
+  }
+  .hero__eyebrow {
+    margin-bottom: 0.5rem;
+    color: #f2bb6d;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .hero__org {
+    margin-top: 0.75rem;
+    color: var(--hero-muted);
+  }
+  .hero__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .hero__facts li {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.1);
+    border: 1px solid rgb(255 255 255 / 0.18);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .hero__progress {
+    padding: 1.25rem;
+    border-radius: var(--radius);
+    background: rgb(255 255 255 / 0.07);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    align-self: end;
+  }
+  @media (min-width: 64rem) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 1fr) 22rem;
+      align-items: end;
+      padding-block: 3.5rem;
+    }
+  }
+
+  .quick {
+    margin-top: 1.25rem;
+  }
+  .quick ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.625rem;
+  }
+  .quick a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 100%;
+    min-height: 3.5rem;
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    color: var(--heading);
+    text-decoration: none;
+    transition:
+      box-shadow 0.2s var(--ease),
+      border-color 0.2s var(--ease);
+  }
+  .quick a:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+  }
+  .quick a > span:last-child {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+  }
+  .quick small {
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+  }
+  .quick__icon {
+    display: none;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    background: var(--badge-soon-bg);
+    color: var(--badge-soon-fg);
+  }
+  .quick__icon--cours {
+    background: var(--badge-cours-bg);
+    color: var(--badge-cours-fg);
+  }
+  .quick__icon--td {
+    background: var(--badge-td-bg);
+    color: var(--badge-td-fg);
+  }
+  @media (min-width: 30rem) {
+    .quick__icon {
+      display: inline-grid;
+    }
+  }
+  @media (max-width: 29.99rem) {
+    .quick a {
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      gap: 0;
+    }
+    .quick a > span:last-child {
+      align-items: center;
+    }
+  }
+
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2.75rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+</style>

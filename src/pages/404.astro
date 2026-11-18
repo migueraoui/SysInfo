@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import { url } from '../lib/url';
+---
+
+<BaseLayout title="Page introuvable" description="Cette page n'existe pas ou a été déplacée." noindex>
+  <section class="container notfound">
+    <p class="notfound__code" aria-hidden="true">404</p>
+    <h1>Page introuvable</h1>
+    <p class="muted">La page demandée n'existe pas ou a été déplacée. Vérifiez l'adresse ou revenez à l'accueil.</p>
+    <div class="notfound__actions">
+      <Button href={url('/')} variant="primary" icon="home">Accueil</Button>
+      <Button href={url('/seances/')} icon="layers">Séances</Button>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 4rem 3rem;
+    text-align: center;
+  }
+  .notfound__code {
+    font-size: clamp(4.5rem, 3rem + 8vw, 7rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+  }
+  .notfound .muted {
+    max-width: 30rem;
+  }
+  .notfound__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DocumentList from '../../components/DocumentList.astro';
+import { getAllDocuments, getChapitres } from '../../lib/content';
+import { MODULE } from '../../site.config';
+
+const docs = await getAllDocuments('td');
+const chapitres = await getChapitres();
+---
+
+<BaseLayout
+  title="Travaux dirigés"
+  description={`Toutes les fiches de TD publiées du module ${MODULE.nom} (${MODULE.niveauCourt}, ${MODULE.semestre}), à lire en ligne ou à télécharger en PDF.`}
+>
+  <header class="container page-head">
+    <p class="eyebrow">{MODULE.nom}</p>
+    <h1>Travaux dirigés</h1>
+    <p class="lead">Les fiches de TD publiées, de la plus récente à la plus ancienne.</p>
+  </header>
+  <section class="container section" aria-label="Liste des TD">
+    <DocumentList
+      docs={docs}
+      chapitres={chapitres}
+      noun={['TD', 'TD']}
+      emptyMessage="Aucune fiche de TD n'est encore publiée."
+    />
+  </section>
+</BaseLayout>

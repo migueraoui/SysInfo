@@ -1,0 +1,131 @@
+---
+import DocumentCard from './DocumentCard.astro';
+import type { DocInfo } from '../lib/types';
+import { pluralize } from '../lib/format';
+
+interface Props {
+  docs: DocInfo[];
+  chapitres: { numero: number; titre: string }[];
+  /** Nom au singulier et au pluriel, ex. ['TD', 'TD'] ou ['cours', 'cours']. */
+  noun: [string, string];
+  emptyMessage: string;
+}
+
+const { docs, chapitres, noun, emptyMessage } = Astro.props;
+const chapsWithDocs = chapitres.filter((c) => docs.some((d) => d.chapitre === c.numero));
+const showFilter = chapsWithDocs.length > 1;
+---
+
+{
+  docs.length === 0 ? (
+    <p class="empty">{emptyMessage}</p>
+  ) : (
+    <div class="doc-list" data-doc-list>
+      {showFilter && (
+        <div class="filter" data-filter hidden>
+          <div class="filter__chips" role="group" aria-label="Filtrer par chapitre">
+            <button type="button" class="chip" data-filter-value="all" aria-pressed="true">
+              Tous
+            </button>
+            {chapsWithDocs.map((c) => (
+              <button
+                type="button"
+                class="chip"
+                data-filter-value={String(c.numero)}
+                aria-pressed="false"
+                title={`Chapitre ${c.numero} : ${c.titre}`}
+              >
+                Ch. {c.numero}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <p
+        class="doc-list__count muted"
+        data-filter-count
+        data-singular={noun[0]}
+        data-plural={noun[1]}
+        aria-live="polite"
+      >
+        {pluralize(docs.length, noun[0], noun[1])}
+      </p>
+      <ul class="grid-cards" role="list">
+        {docs.map((doc) => (
+          <li data-chapitre={doc.chapitre}>
+            <DocumentCard doc={doc} showSeance headingLevel={2} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-doc-list]').forEach((list) => {
+    const filter = list.querySelector<HTMLElement>('[data-filter]');
+    if (!filter) return;
+    const chips = Array.from(filter.querySelectorAll<HTMLButtonElement>('[data-filter-value]'));
+    const items = Array.from(list.querySelectorAll<HTMLElement>('li[data-chapitre]'));
+    const count = list.querySelector<HTMLElement>('[data-filter-count]');
+    const singular = count?.dataset.singular ?? '';
+    const plural = count?.dataset.plural ?? singular;
+
+    function apply(value: string): void {
+      let visible = 0;
+      for (const item of items) {
+        const show = value === 'all' || item.dataset.chapitre === value;
+        item.hidden = !show;
+        if (show) visible++;
+      }
+      for (const chip of chips) chip.setAttribute('aria-pressed', String(chip.dataset.filterValue === value));
+      if (count) count.textContent = `${visible} ${visible > 1 ? plural : singular}`;
+    }
+
+    filter.hidden = false;
+    filter.addEventListener('click', (e) => {
+      const chip = (e.target as Element).closest<HTMLButtonElement>('[data-filter-value]');
+      if (chip?.dataset.filterValue) apply(chip.dataset.filterValue);
+    });
+  });
+</script>
+
+<style>
+  .filter {
+    margin-bottom: 0.5rem;
+  }
+  .filter__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chip {
+    min-height: 2.75rem;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 0.15s var(--ease),
+      color 0.15s var(--ease);
+  }
+  .chip:hover {
+    background: var(--surface-hover);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+  }
+  .doc-list__count {
+    margin-bottom: 0.75rem;
+    font-size: 0.9375rem;
+  }
+  .doc-list :global(.doc-card) {
+    height: 100%;
+  }
+</style>

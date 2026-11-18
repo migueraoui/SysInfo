@@ -22,7 +22,7 @@ const labels = { cours: 'Cours', td: 'TD', corrige: 'Corrigé' } as const;
   <Heading class="seance-card__title">
     <a href={seance.href} class="seance-card__link">{seance.titre}</a>
   </Heading>
-  <p class="seance-card__resume">{seance.resume}</p>
+  {seance.resume && <p class="seance-card__resume">{seance.resume}</p>}
   <div class="seance-card__foot">
     {
       seance.publiee ? (

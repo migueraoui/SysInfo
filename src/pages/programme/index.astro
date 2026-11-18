@@ -1,0 +1,373 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Badge from '../../components/Badge.astro';
+import Icon from '../../components/Icon.astro';
+import { getChapitres, getSeances } from '../../lib/content';
+import { BIBLIOGRAPHIE, OBJECTIFS } from '../../data/programme';
+import { MODULE } from '../../site.config';
+
+const chapitres = await getChapitres();
+const seances = await getSeances();
+const byNum = new Map(seances.map((s) => [s.numero, s]));
+---
+
+<BaseLayout
+  title="Programme"
+  description={`Programme officiel du module ${MODULE.nom} (${MODULE.niveauCourt}, ${MODULE.semestre}) : objectifs, chapitres, évaluation et bibliographie.`}
+>
+  <header class="container page-head">
+    <p class="eyebrow">Canevas officiel</p>
+    <h1>Programme du module</h1>
+    <p class="lead">{MODULE.nom} — {MODULE.niveau} ({MODULE.semestre}), {MODULE.departement.toLowerCase()}.</p>
+    <dl class="facts">
+      <div>
+        <dt>Crédits</dt>
+        <dd>{MODULE.credits}</dd>
+      </div>
+      <div>
+        <dt>Coefficient</dt>
+        <dd>{MODULE.coefficient}</dd>
+      </div>
+      <div>
+        <dt>Semestre</dt>
+        <dd>{MODULE.semestre}</dd>
+      </div>
+      <div>
+        <dt>Année</dt>
+        <dd>{MODULE.annee}</dd>
+      </div>
+    </dl>
+  </header>
+
+  <section class="container section" aria-labelledby="objectifs">
+    <h2 id="objectifs" class="h2-icon"><Icon name="target" size={22} />Objectifs du module</h2>
+    <ol class="objectifs" role="list">
+      {OBJECTIFS.map((o, i) => (
+        <li>
+          <span class="objectifs__num" aria-hidden="true">{i + 1}</span>
+          <span>{o}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="container section" aria-labelledby="chapitres">
+    <h2 id="chapitres" class="h2-icon"><Icon name="layers" size={22} />Contenu</h2>
+    <div class="chapitres">
+      {
+        chapitres.map((c) => {
+          const chapSeances = seances.filter((s) => s.chapitre === c.numero);
+          const couvert = chapSeances.length > 0;
+          const mapped = new Set(c.items.flatMap((it) => it.seances));
+          // Séances du chapitre non rattachées à un point précis du canevas.
+          const autres = chapSeances.filter((s) => !mapped.has(s.numero));
+          return (
+            <article class="chapitre" aria-labelledby={`ch-${c.numero}`}>
+              <header class="chapitre__head">
+                <div>
+                  <p class="chapitre__num">Chapitre {c.numero}</p>
+                  <h3 id={`ch-${c.numero}`}>{c.titre}</h3>
+                </div>
+                {!couvert && <Badge variant="soon">À venir</Badge>}
+              </header>
+              <ul class="chapitre__items" role="list">
+                {c.items.map((it) => (
+                  <li>
+                    <p>{it.texte}</p>
+                    {it.seances.length > 0 && (
+                      <ul class="chapitre__links" role="list" aria-label="Séances correspondantes">
+                        {it.seances.map((n) => {
+                          const s = byNum.get(n);
+                          return s ? (
+                            <li>
+                              <a href={s.href} class:list={['seance-link', !s.publiee && 'seance-link--soon']}>
+                                Séance {n}
+                                {!s.publiee && <span class="seance-link__soon"> · à venir</span>}
+                              </a>
+                            </li>
+                          ) : null;
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {autres.length > 0 && (
+                <ul class="chapitre__links chapitre__others" role="list" aria-label="Autres séances du chapitre">
+                  {autres.map((s) => (
+                    <li>
+                      <a href={s.href} class="seance-link">
+                        Séance {s.numero}
+                        {!s.publiee && <span class="seance-link__soon"> · à venir</span>}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <section class="container section" aria-labelledby="evaluation">
+    <div class="two-cols">
+      <div class="panel">
+        <h2 id="evaluation" class="h2-icon"><Icon name="award" size={22} />Évaluation</h2>
+        <div class="eval" aria-hidden="true">
+          <span class="eval__exam" style={`flex-basis:${MODULE.evaluation.examen}%`}>{MODULE.evaluation.examen} %</span>
+          <span class="eval__cc" style={`flex-basis:${MODULE.evaluation.controleContinu}%`}>
+            {MODULE.evaluation.controleContinu} %
+          </span>
+        </div>
+        <ul class="eval__legend" role="list">
+          <li><span class="dot dot--exam"></span>Examen : {MODULE.evaluation.examen} %</li>
+          <li><span class="dot dot--cc"></span>Contrôle continu : {MODULE.evaluation.controleContinu} %</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2 id="prealables" class="h2-icon"><Icon name="info" size={22} />Connaissances préalables</h2>
+        <ul class="prealables">
+          {MODULE.prealables.map((p) => <li>{p}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section" aria-labelledby="bibliographie">
+    <h2 id="bibliographie" class="h2-icon"><Icon name="library" size={22} />Bibliographie</h2>
+    <ul class="biblio" role="list">
+      {
+        BIBLIOGRAPHIE.map((r) => (
+          <li>
+            {r.auteurs}, <cite>{r.titre}</cite>
+            {r.details && `, ${r.details}`}.
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .h2-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .h2-icon :global(.icon) {
+    color: var(--accent-text);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
+    margin: 1.25rem 0 0;
+    max-width: 40rem;
+  }
+  @media (min-width: 40rem) {
+    .facts {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .facts div {
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .facts dt {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+  .facts dd {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--heading);
+  }
+
+  .objectifs {
+    display: grid;
+    gap: 0.75rem;
+  }
+  @media (min-width: 48rem) {
+    .objectifs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .objectifs li {
+    display: flex;
+    gap: 0.875rem;
+    padding: 1rem 1.125rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+  .objectifs__num {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--badge-td-bg);
+    color: var(--badge-td-fg);
+    font-weight: 700;
+    font-size: 0.9375rem;
+  }
+
+  .chapitres {
+    display: grid;
+    gap: 1rem;
+  }
+  .chapitre {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .chapitre__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.125rem;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .chapitre__num {
+    color: var(--accent-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .chapitre__head h3 {
+    font-size: 1.125rem;
+  }
+  .chapitre__items > li {
+    padding: 0.875rem 1.125rem;
+  }
+  .chapitre__items > li + li {
+    border-top: 1px solid var(--border);
+  }
+  .chapitre__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    margin-top: 0.25rem;
+  }
+  .chapitre__others {
+    margin: 0;
+    padding: 0.25rem 1.125rem 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .seance-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .seance-link__soon {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .two-cols {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .two-cols {
+      grid-template-columns: 3fr 2fr;
+    }
+  }
+  .panel {
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+  .eval {
+    display: flex;
+    height: 2.5rem;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    font-weight: 700;
+    font-size: 0.9375rem;
+  }
+  .eval span {
+    display: grid;
+    place-items: center;
+  }
+  .eval__exam {
+    background: var(--navy);
+    color: #ffffff;
+  }
+  .eval__cc {
+    background: var(--amber);
+    color: #1b2433;
+  }
+  .eval__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: 0.75rem;
+  }
+  .eval__legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 3px;
+  }
+  .dot--exam {
+    background: var(--navy);
+    box-shadow: 0 0 0 1px var(--border-strong);
+  }
+  .dot--cc {
+    background: var(--amber);
+  }
+  .prealables {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .biblio {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 50rem;
+  }
+  .biblio li {
+    position: relative;
+    padding: 0.75rem 1rem 0.75rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .biblio li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--accent);
+  }
+  .biblio cite {
+    font-style: italic;
+    color: var(--heading);
+  }
+</style>

@@ -1,0 +1,332 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Badge from '../../components/Badge.astro';
+import DocumentCard from '../../components/DocumentCard.astro';
+import Icon from '../../components/Icon.astro';
+import { getChapitres, getSeances } from '../../lib/content';
+import type { SeanceSummary } from '../../lib/types';
+import { url } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const seances = await getSeances();
+  return seances.map((seance, i) => ({
+    params: { slug: seance.slug },
+    props: { seance, prev: seances[i - 1], next: seances[i + 1] },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  seance: SeanceSummary;
+  prev?: SeanceSummary;
+  next?: SeanceSummary;
+}
+
+const { seance, prev, next } = Astro.props;
+const chapitre = (await getChapitres()).find((c) => c.numero === seance.chapitre);
+const description = `Séance ${seance.numero} — ${seance.titre}.${seance.resume ? ` ${seance.resume}` : ''}`;
+---
+
+<BaseLayout title={`Séance ${seance.numero} : ${seance.titre}`} description={description}>
+  <div class="container">
+    <Breadcrumb
+      items={[
+        { label: 'Accueil', href: url('/') },
+        { label: 'Séances', href: url('/seances/') },
+        { label: `Séance ${seance.numero}` },
+      ]}
+    />
+  </div>
+
+  <header class="container seance-head">
+    <p class="eyebrow">Chapitre {seance.chapitre}{chapitre && ` · ${chapitre.titre}`}</p>
+    <div class="seance-head__title">
+      <span class="seance-head__num" aria-hidden="true">{seance.slug}</span>
+      <h1><span class="sr-only">Séance {seance.numero} : </span>{seance.titre}</h1>
+    </div>
+    {seance.resume && <p class="lead">{seance.resume}</p>}
+    {
+      seance.motsCles.length > 0 && (
+        <ul class="keywords" role="list" aria-label="Mots-clés">
+          {seance.motsCles.map((m) => (
+            <li>
+              <Icon name="tag" size={14} />
+              {m}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </header>
+
+  <section class="container section docs" aria-labelledby="docs-title">
+    <div class="section-head">
+      <h2 id="docs-title">Documents</h2>
+      {!seance.publiee && <Badge variant="soon">À venir</Badge>}
+    </div>
+    {
+      seance.publiee ? (
+        <ul class="docs__grid" role="list">
+          {seance.documents.map((doc) => (
+            <li>
+              <DocumentCard doc={doc} id={doc.anchor} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">
+          <Icon name="clock" size={22} class="empty__icon" />
+          Les documents de cette séance seront publiés prochainement.
+        </p>
+      )
+    }
+  </section>
+
+  {
+    seance.publiee && (
+      <section class="container preview" aria-labelledby="preview-title" data-preview hidden>
+        <div class="section-head">
+          <h2 id="preview-title">Aperçu</h2>
+          <div class="preview__tabs" role="group" aria-label="Document à afficher">
+            {seance.documents.map((doc, i) => (
+              <button
+                type="button"
+                class="preview__tab"
+                data-preview-src={doc.href}
+                data-preview-label={doc.label}
+                aria-pressed={i === 0 ? 'true' : 'false'}
+              >
+                {doc.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div class="preview__frame" data-preview-frame />
+      </section>
+    )
+  }
+
+  <nav class="container pager" aria-label="Séances précédente et suivante">
+    {
+      prev ? (
+        <a href={prev.href} class="pager__link pager__link--prev" rel="prev">
+          <Icon name="chevron-left" size={20} />
+          <span>
+            <small>Séance précédente</small>
+            <span class="pager__title">
+              {prev.numero}. {prev.titre}
+            </span>
+          </span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      next ? (
+        <a href={next.href} class="pager__link pager__link--next" rel="next">
+          <span>
+            <small>Séance suivante</small>
+            <span class="pager__title">
+              {next.numero}. {next.titre}
+            </span>
+          </span>
+          <Icon name="chevron-right" size={20} />
+        </a>
+      ) : (
+        <span />
+      )
+    }
+  </nav>
+</BaseLayout>
+
+<script>
+  // Aperçu intégré : uniquement sur grand écran (les navigateurs mobiles affichent mal les PDF intégrés).
+  const section = document.querySelector<HTMLElement>('[data-preview]');
+  const frameBox = section?.querySelector<HTMLElement>('[data-preview-frame]');
+  const tabs = Array.from(section?.querySelectorAll<HTMLButtonElement>('[data-preview-src]') ?? []);
+  const desktop = window.matchMedia('(min-width: 64rem) and (hover: hover) and (pointer: fine)');
+
+  function show(tab: HTMLButtonElement): void {
+    if (!frameBox) return;
+    for (const t of tabs) t.setAttribute('aria-pressed', String(t === tab));
+    let frame = frameBox.querySelector('iframe');
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frameBox.appendChild(frame);
+    }
+    frame.title = `Aperçu : ${tab.dataset.previewLabel ?? 'document'}`;
+    frame.src = tab.dataset.previewSrc ?? '';
+  }
+
+  function init(): void {
+    if (!section || !desktop.matches || !tabs[0] || section.dataset.ready) return;
+    section.dataset.ready = 'true';
+    section.hidden = false;
+    show(tabs[0]);
+  }
+
+  if (section) {
+    section.addEventListener('click', (e) => {
+      const tab = (e.target as Element).closest<HTMLButtonElement>('[data-preview-src]');
+      if (tab) show(tab);
+    });
+    init();
+    desktop.addEventListener('change', init);
+  }
+</script>
+
+<style>
+  .seance-head {
+    padding-block: 0.25rem 0.5rem;
+  }
+  .seance-head__title {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    margin-top: 0.5rem;
+  }
+  .seance-head__num {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .seance-head .lead {
+    margin-top: 0.875rem;
+    color: var(--text-muted);
+    max-width: 46rem;
+  }
+  .keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .keywords li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+  .docs__grid {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .docs__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+    .docs__grid > li > :global(.doc-card) {
+      height: 100%;
+    }
+  }
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .preview {
+    padding-bottom: 1rem;
+  }
+  .preview__tabs {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .preview__tab {
+    min-height: 2.75rem;
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+  }
+  .preview__tab[aria-pressed='true'] {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+  }
+  .preview__frame {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface-2);
+    box-shadow: var(--shadow-sm);
+  }
+  .preview__frame :global(iframe) {
+    display: block;
+    width: 100%;
+    height: min(85vh, 60rem);
+    border: 0;
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    padding-block: 1.5rem 1rem;
+  }
+  .pager__link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--heading);
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition:
+      border-color 0.15s var(--ease),
+      box-shadow 0.15s var(--ease);
+  }
+  .pager__link:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+  }
+  .pager__link > span {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .pager__link small {
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+  }
+  .pager__title {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pager__link--next {
+    justify-content: flex-end;
+    text-align: right;
+    grid-column: 2;
+  }
+</style>

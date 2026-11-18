@@ -33,7 +33,7 @@ const seances = defineCollection({
       numero: z.number().int().min(1).max(99),
       chapitre: z.number().int().min(1),
       titre: z.string().trim().min(3),
-      resume: z.string().trim().min(10),
+      resume: z.string().trim().default(''),
       motsCles: z.array(z.string().trim().min(1)).default([]),
       documents: z.array(documentSchema).default([]),
     })

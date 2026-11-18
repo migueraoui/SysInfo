@@ -144,7 +144,12 @@ export async function getChapitres() {
   return entries.map((e) => e.data).sort((a, b) => a.numero - b.numero);
 }
 
-export async function getAnnonces() {
+const ANNONCES_DIR = path.resolve(process.cwd(), 'src', 'content', 'annonces');
+
+export async function getAnnonces(): Promise<CollectionEntry<'annonces'>[]> {
+  // Les annonces sont facultatives : pas d'appel (ni d'avertissement) si le dossier est vide.
+  const hasAny = fs.existsSync(ANNONCES_DIR) && fs.readdirSync(ANNONCES_DIR).some((f) => f.endsWith('.md'));
+  if (!hasAny) return [];
   const entries = await getCollection('annonces');
   return entries.sort((a, b) => b.data.date.localeCompare(a.data.date) || a.id.localeCompare(b.id));
 }

@@ -59,7 +59,7 @@ const ogAlt = `${MODULE.nom} — ${MODULE.niveau} (${MODULE.semestre}), ${MODULE
     <meta property="og:site_name" content={siteTitle} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!noindex && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />

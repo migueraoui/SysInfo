@@ -2,7 +2,7 @@
 import type { HTMLAttributes } from 'astro/types';
 import Icon, { type IconName } from './Icon.astro';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'light' | 'outline-light';
 
 type Props = {
   variant?: Variant;
@@ -85,5 +85,25 @@ const classes = ['btn', `btn--${variant}`, block && 'btn--block', className];
   }
   .btn--ghost:hover {
     background: var(--surface-hover);
+  }
+  /* Variantes pour fond bleu marine (bandeau d'accueil) */
+  .btn--light {
+    background: #ffffff;
+    color: #1b365d;
+  }
+  .btn--light:hover {
+    background: #eef3fa;
+  }
+  .btn--outline-light {
+    background: transparent;
+    color: #ffffff;
+    border-color: rgb(255 255 255 / 0.55);
+  }
+  .btn--outline-light:hover {
+    background: rgb(255 255 255 / 0.1);
+  }
+  .btn--light:focus-visible,
+  .btn--outline-light:focus-visible {
+    outline-color: #f2bb6d;
   }
 </style>
