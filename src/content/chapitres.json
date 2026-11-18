@@ -1,0 +1,51 @@
+[
+  {
+    "id": "1",
+    "numero": 1,
+    "titre": "Généralités",
+    "items": [
+      {
+        "texte": "Définitions et caractérisations de l'entreprise (aspects fonctionnels et structurels).",
+        "seances": [1]
+      },
+      {
+        "texte": "Approche systémique des organisations : présentation globale des trois systèmes (le système de décision, classification des décisions par niveau et par méthode, une technique de décision programmable, les tables de décision).",
+        "seances": [2]
+      },
+      {
+        "texte": "Le système d'information (aspects fonctionnels et structurels : station, poste de travail, flux, documents).",
+        "seances": [2]
+      },
+      {
+        "texte": "Le diagramme de flux.",
+        "seances": [2]
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "numero": 2,
+    "titre": "Les techniques de représentation de l'information",
+    "items": [
+      { "texte": "Notion d'information.", "seances": [3] },
+      { "texte": "Formes et manipulation de l'information.", "seances": [3] },
+      { "texte": "Schéma et codification de l'information.", "seances": [3] }
+    ]
+  },
+  {
+    "id": "3",
+    "numero": 3,
+    "titre": "Saisie et contrôle de l'information",
+    "items": [{ "texte": "Différents types de contrôle de l'information.", "seances": [] }]
+  },
+  {
+    "id": "4",
+    "numero": 4,
+    "titre": "Méthodologie de développement d'un SI : MERISE",
+    "items": [
+      { "texte": "Processus de développement d'un SI.", "seances": [] },
+      { "texte": "Niveau d'abstraction des modèles de données et de traitements.", "seances": [4, 5] },
+      { "texte": "Modélisation statique (MCD) et dynamique (MCT).", "seances": [4, 5] }
+    ]
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "numero": 4,
+  "chapitre": 4,
+  "titre": "Modélisation statique : le modèle conceptuel des données (MCD)",
+  "resume": "Dictionnaire des données, règles de gestion, entité, propriété, identifiant, association, cardinalités, types d'associations, démarche de construction.",
+  "motsCles": ["MCD", "entité", "association", "cardinalités"],
+  "documents": []
+}

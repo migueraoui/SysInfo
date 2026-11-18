@@ -1,0 +1,8 @@
+{
+  "numero": 5,
+  "chapitre": 4,
+  "titre": "Modélisation dynamique : le modèle conceptuel des traitements (MCT)",
+  "resume": "Événement, opération, synchronisation, règle d'émission, résultat, processus ; formalisme, règles de vérification, du diagramme de flux au MCT, vers le MOT.",
+  "motsCles": ["MCT", "événement", "opération", "synchronisation"],
+  "documents": []
+}
