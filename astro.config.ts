@@ -9,6 +9,8 @@ export default defineConfig({
   output: 'static',
   build: {
     format: 'directory',
+    // Feuilles de style petites : intégrées dans la page (aucune requête bloquante).
+    inlineStylesheets: 'always',
   },
   devToolbar: {
     enabled: false,

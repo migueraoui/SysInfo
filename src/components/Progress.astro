@@ -13,8 +13,7 @@ const pct = total ? Math.round((publiees / total) * 100) : 0;
 
 <div class="progress">
   <p class="progress__label">
-    <strong>{publiees}</strong>
-    {publiees > 1 ? 'séances publiées' : 'séance publiée'} sur {total}
+    <strong>{publiees}</strong>{' '}{publiees > 1 ? 'séances publiées' : 'séance publiée'} sur {total}
   </p>
   <div
     class="progress__bar"

@@ -10,7 +10,7 @@ const pathname = Astro.url.pathname;
 
 <header class="site-header">
   <div class="container site-header__inner">
-    <a href={url('/')} class="brand" aria-label={`${MODULE.nom} — accueil`}>
+    <a href={url('/')} class="brand">
       <Logo size={36} />
       <span class="brand__text">
         <span class="brand__name">{MODULE.nom}</span>
@@ -44,9 +44,7 @@ const pathname = Astro.url.pathname;
     position: sticky;
     top: 0;
     z-index: 40;
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
-    -webkit-backdrop-filter: saturate(1.4) blur(10px);
-    backdrop-filter: saturate(1.4) blur(10px);
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
     padding-top: env(safe-area-inset-top, 0px);
   }

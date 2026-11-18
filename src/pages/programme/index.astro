@@ -82,7 +82,7 @@ const byNum = new Map(seances.map((s) => [s.numero, s]));
                             <li>
                               <a href={s.href} class:list={['seance-link', !s.publiee && 'seance-link--soon']}>
                                 Séance {n}
-                                {!s.publiee && <span class="seance-link__soon"> · à venir</span>}
+                                {!s.publiee && <span class="seance-link__soon">{' · à venir'}</span>}
                               </a>
                             </li>
                           ) : null;
@@ -98,7 +98,7 @@ const byNum = new Map(seances.map((s) => [s.numero, s]));
                     <li>
                       <a href={s.href} class="seance-link">
                         Séance {s.numero}
-                        {!s.publiee && <span class="seance-link__soon"> · à venir</span>}
+                        {!s.publiee && <span class="seance-link__soon">{' · à venir'}</span>}
                       </a>
                     </li>
                   ))}
