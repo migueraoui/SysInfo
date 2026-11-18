@@ -1,0 +1,60 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+
+type Variant = 'cours' | 'td' | 'corrige' | 'soon' | 'neutral';
+
+interface Props {
+  variant?: Variant;
+  icon?: IconName | false;
+  class?: string;
+}
+
+const defaultIcons: Record<Variant, IconName | undefined> = {
+  cours: 'book',
+  td: 'pencil',
+  corrige: 'check',
+  soon: 'clock',
+  neutral: undefined,
+};
+
+const { variant = 'neutral', icon, class: className } = Astro.props;
+const iconName = icon === false ? undefined : (icon ?? defaultIcons[variant]);
+---
+
+<span class:list={['badge', `badge--${variant}`, className]}>
+  {iconName && <Icon name={iconName} size={14} />}
+  <slot />
+</span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+  }
+  .badge--cours {
+    --badge-bg: var(--badge-cours-bg);
+    --badge-fg: var(--badge-cours-fg);
+  }
+  .badge--td {
+    --badge-bg: var(--badge-td-bg);
+    --badge-fg: var(--badge-td-fg);
+  }
+  .badge--corrige {
+    --badge-bg: var(--badge-corrige-bg);
+    --badge-fg: var(--badge-corrige-fg);
+  }
+  .badge--soon,
+  .badge--neutral {
+    --badge-bg: var(--badge-soon-bg);
+    --badge-fg: var(--badge-soon-fg);
+  }
+</style>

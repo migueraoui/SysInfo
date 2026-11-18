@@ -1,0 +1,126 @@
+---
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { MAIN_NAV } from '../lib/nav';
+import { isActive, url } from '../lib/url';
+import { MODULE } from '../site.config';
+
+const pathname = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a href={url('/')} class="brand" aria-label={`${MODULE.nom} — accueil`}>
+      <Logo size={36} />
+      <span class="brand__text">
+        <span class="brand__name">{MODULE.nom}</span>
+        <span class="brand__sub">{MODULE.niveauCourt} · {MODULE.semestre} · {MODULE.annee}</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" aria-label="Navigation principale">
+      <ul role="list">
+        {
+          MAIN_NAV.map((item) => {
+            const active = isActive(pathname, item.path);
+            return (
+              <li>
+                <a href={url(item.path)} aria-current={active ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+
+    <ThemeToggle />
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: var(--header-h);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+    min-height: 2.75rem;
+    margin-right: auto;
+    color: var(--heading);
+    text-decoration: none;
+  }
+  .brand__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+  }
+  .brand__name {
+    font-weight: 700;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .brand__sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .site-nav {
+    display: none;
+  }
+  @media (min-width: 48rem) {
+    .site-nav {
+      display: block;
+    }
+    .site-nav ul {
+      display: flex;
+      gap: 0.25rem;
+    }
+    .site-nav a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.75rem;
+      padding: 0 0.875rem;
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-weight: 500;
+      font-size: 0.9375rem;
+      text-decoration: none;
+      transition: background-color 0.15s var(--ease);
+    }
+    .site-nav a:hover {
+      background: var(--surface-hover);
+    }
+    .site-nav a[aria-current='page'] {
+      color: var(--heading);
+      font-weight: 650;
+      background: var(--surface-hover);
+      box-shadow: inset 0 -2px 0 var(--accent);
+    }
+    .brand__name {
+      font-size: 1.0625rem;
+    }
+  }
+</style>

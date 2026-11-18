@@ -1,0 +1,82 @@
+---
+import Icon from './Icon.astro';
+import { BOTTOM_NAV } from '../lib/nav';
+import { isActive, url } from '../lib/url';
+
+const pathname = Astro.url.pathname;
+---
+
+<nav class="bottom-nav" aria-label="Navigation rapide">
+  <ul role="list">
+    {
+      BOTTOM_NAV.map((item) => {
+        const active = isActive(pathname, item.path);
+        return (
+          <li>
+            <a href={url(item.path)} aria-current={active ? 'page' : undefined}>
+              <Icon name={item.icon} size={22} />
+              <span>{item.label}</span>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</nav>
+
+<style>
+  .bottom-nav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-top: 1px solid var(--border);
+    padding-bottom: var(--safe-bottom);
+  }
+  .bottom-nav ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: var(--bottomnav-h);
+    max-width: 32rem;
+    margin-inline: auto;
+  }
+  .bottom-nav a {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    height: 100%;
+    min-height: 2.75rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .bottom-nav a[aria-current='page'] {
+    color: var(--heading);
+  }
+  .bottom-nav a[aria-current='page']::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2rem;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--accent);
+    transform: translateX(-50%);
+  }
+  .bottom-nav a:focus-visible {
+    outline-offset: -3px;
+  }
+  @media (min-width: 48rem) {
+    .bottom-nav {
+      display: none;
+    }
+  }
+</style>

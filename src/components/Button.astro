@@ -1,0 +1,89 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import Icon, { type IconName } from './Icon.astro';
+
+type Variant = 'primary' | 'secondary' | 'ghost';
+
+type Props = {
+  variant?: Variant;
+  icon?: IconName;
+  iconAfter?: IconName;
+  block?: boolean;
+  class?: string;
+} & (({ href: string } & Omit<HTMLAttributes<'a'>, 'href' | 'class'>) | ({ href?: undefined } & Omit<HTMLAttributes<'button'>, 'class'>));
+
+const { variant = 'secondary', icon, iconAfter, block = false, class: className, href, ...rest } = Astro.props;
+const classes = ['btn', `btn--${variant}`, block && 'btn--block', className];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...(rest as HTMLAttributes<'a'>)}>
+      {icon && <Icon name={icon} size={18} />}
+      <span>
+        <slot />
+      </span>
+      {iconAfter && <Icon name={iconAfter} size={18} />}
+    </a>
+  ) : (
+    <button type="button" class:list={classes} {...(rest as HTMLAttributes<'button'>)}>
+      {icon && <Icon name={icon} size={18} />}
+      <span>
+        <slot />
+      </span>
+      {iconAfter && <Icon name={iconAfter} size={18} />}
+    </button>
+  )
+}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem; /* 44 px */
+    padding: 0.5rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.15s var(--ease),
+      border-color 0.15s var(--ease),
+      transform 0.15s var(--ease);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn--block {
+    width: 100%;
+  }
+  .btn--primary {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+  .btn--primary:hover {
+    background: var(--primary-hover);
+  }
+  .btn--secondary {
+    background: var(--surface);
+    color: var(--heading);
+    border-color: var(--border-strong);
+  }
+  .btn--secondary:hover {
+    background: var(--surface-hover);
+  }
+  .btn--ghost {
+    background: transparent;
+    color: var(--link);
+  }
+  .btn--ghost:hover {
+    background: var(--surface-hover);
+  }
+</style>

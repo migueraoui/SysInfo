@@ -1,0 +1,102 @@
+---
+import Logo from './Logo.astro';
+import { MAIN_NAV } from '../lib/nav';
+import { url } from '../lib/url';
+import { buildDateLabel, todayIso } from '../lib/format';
+import { MODULE } from '../site.config';
+
+const updated = buildDateLabel();
+const isoNow = todayIso();
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__id">
+      <Logo size={32} />
+      <div>
+        <p class="site-footer__module">{MODULE.nom}</p>
+        <p>{MODULE.institution}</p>
+        <p>{MODULE.departement}</p>
+        <p>{MODULE.niveau} ({MODULE.semestre}) · Année universitaire {MODULE.annee}</p>
+      </div>
+    </div>
+    <nav aria-label="Liens du pied de page">
+      <ul role="list" class="site-footer__links">
+        {
+          MAIN_NAV.map((item) => (
+            <li>
+              <a href={url(item.path)}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <p class="site-footer__updated">
+      Dernière mise à jour : <time datetime={isoNow}>{updated}</time>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    /* Laisse la place à la barre de navigation inférieure sur téléphone. */
+    padding-bottom: calc(var(--bottomnav-h) + var(--safe-bottom));
+  }
+  @media (min-width: 48rem) {
+    .site-footer {
+      padding-bottom: 0;
+    }
+  }
+  .site-footer__inner {
+    display: grid;
+    gap: 1.25rem;
+    padding-block: 1.75rem;
+  }
+  .site-footer__id {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .site-footer__module {
+    color: var(--heading);
+    font-weight: 700;
+    font-size: 0.9375rem;
+  }
+  .site-footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.25rem;
+  }
+  .site-footer__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.5rem;
+    color: var(--text-muted);
+  }
+  .site-footer__links li:first-child a {
+    padding-left: 0;
+  }
+  .site-footer__links a:hover {
+    color: var(--link);
+  }
+  .site-footer__updated {
+    font-size: 0.8125rem;
+  }
+  @media (min-width: 48rem) {
+    .site-footer__inner {
+      grid-template-columns: 1fr auto;
+      align-items: start;
+    }
+    .site-footer__updated {
+      grid-column: 1 / -1;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+  }
+</style>

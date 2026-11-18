@@ -1,11 +1,29 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Badge from '../components/Badge.astro';
+import Button from '../components/Button.astro';
+import Card from '../components/Card.astro';
+import { url } from '../lib/url';
 ---
-<html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <title>Systèmes d'information</title>
-  </head>
-  <body>
+
+<BaseLayout>
+  <section class="container page-head">
+    <p class="eyebrow">En construction</p>
     <h1>Systèmes d'information</h1>
-  </body>
-</html>
+  </section>
+  <section class="container section">
+    <Card>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+        <Badge variant="cours">Cours</Badge>
+        <Badge variant="td">TD</Badge>
+        <Badge variant="corrige">Corrigé</Badge>
+        <Badge variant="soon">À venir</Badge>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <Button href={url('/')} variant="primary" icon="external">Ouvrir</Button>
+        <Button href={url('/')} icon="download">Télécharger</Button>
+        <Button icon="share" data-share>Partager</Button>
+      </div>
+    </Card>
+  </section>
+</BaseLayout>

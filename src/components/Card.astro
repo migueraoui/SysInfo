@@ -1,0 +1,45 @@
+---
+interface Props {
+  as?: 'article' | 'section' | 'div' | 'li';
+  class?: string;
+  id?: string;
+  interactive?: boolean;
+  [key: `data-${string}`]: string | undefined;
+}
+
+const { as: Tag = 'div', class: className, interactive = false, ...rest } = Astro.props;
+---
+
+<Tag class:list={['card', interactive && 'card--interactive', className]} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.125rem;
+  }
+  @media (min-width: 48rem) {
+    .card {
+      padding: 1.375rem;
+    }
+  }
+  .card--interactive {
+    transition:
+      box-shadow 0.2s var(--ease),
+      transform 0.2s var(--ease),
+      border-color 0.2s var(--ease);
+  }
+  .card--interactive:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+  }
+  .card--interactive:focus-within {
+    border-color: var(--border-strong);
+  }
+</style>

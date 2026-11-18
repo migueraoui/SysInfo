@@ -1,0 +1,45 @@
+---
+interface Props {
+  size?: number;
+}
+const { size = 36 } = Astro.props;
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  width={size}
+  height={size}
+  aria-hidden="true"
+  focusable="false"
+  class="logo"
+>
+  <rect width="64" height="64" rx="14" fill="#1B365D"></rect>
+  <rect x="12" y="46" width="40" height="5" rx="2.5" fill="#D4892A"></rect>
+  <text
+    x="32"
+    y="38"
+    text-anchor="middle"
+    font-family="Inter Variable, Inter, Segoe UI, Arial, sans-serif"
+    font-size="27"
+    font-weight="800"
+    letter-spacing="-0.5"
+    fill="#FFFFFF">SI</text
+  >
+</svg>
+
+<style>
+  .logo {
+    flex-shrink: 0;
+  }
+  :global(:root[data-theme='dark']) .logo {
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.15);
+    border-radius: 22%;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .logo {
+      box-shadow: 0 0 0 1px rgb(255 255 255 / 0.15);
+      border-radius: 22%;
+    }
+  }
+</style>

@@ -1,0 +1,131 @@
+---
+import '@fontsource-variable/inter/wght.css';
+import '../styles/global.css';
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import Header from '../components/Header.astro';
+import BottomNav from '../components/BottomNav.astro';
+import Footer from '../components/Footer.astro';
+import { absoluteUrl, url } from '../lib/url';
+import { MODULE, THEME_COLOR } from '../site.config';
+
+interface Props {
+  /** Titre de la page (sans le nom du site). Absent sur l'accueil. */
+  title?: string;
+  description?: string;
+  /** Pages à ne pas indexer (404). */
+  noindex?: boolean;
+}
+
+const { title, description = MODULE.description, noindex = false } = Astro.props;
+
+const siteTitle = `${MODULE.nom} — ${MODULE.niveauCourt} (${MODULE.semestre})`;
+const fullTitle = title ? `${title} · ${MODULE.nom}` : siteTitle;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = absoluteUrl('/og.png');
+const ogAlt = `${MODULE.nom} — ${MODULE.niveau} (${MODULE.semestre}), ${MODULE.institution}`;
+---
+
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script is:inline>
+      // Applique le thème choisi avant l'affichage (pas de flash).
+      (function () {
+        try {
+          var t = localStorage.getItem('si-theme');
+          if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content={THEME_COLOR} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+
+    <link rel="icon" href={url('/favicon.ico')} sizes="32x32" />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
+    <link rel="manifest" href={url('/site.webmanifest')} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content={siteTitle} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogAlt} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenu">Aller au contenu</a>
+    <Header />
+    <main id="contenu" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <BottomNav />
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script>
+      import '../scripts/app.ts';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  main {
+    flex: 1 0 auto;
+    padding-bottom: 1.5rem;
+  }
+  main:focus {
+    outline: none;
+  }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + 1rem);
+    z-index: 60;
+    max-width: calc(100% - 2rem);
+    padding: 0.75rem 1.125rem;
+    border-radius: var(--radius-sm);
+    background: #1f2d33;
+    color: #ffffff;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    transform: translate(-50%, 1rem);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.2s var(--ease),
+      transform 0.2s var(--ease);
+    overflow-wrap: anywhere;
+  }
+  .toast:empty {
+    visibility: hidden;
+  }
+  .toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  @media (min-width: 48rem) {
+    .toast {
+      bottom: 1.5rem;
+    }
+  }
+</style>

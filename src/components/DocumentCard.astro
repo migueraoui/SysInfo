@@ -1,0 +1,168 @@
+---
+import Badge from './Badge.astro';
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import type { DocInfo } from '../lib/types';
+import { pluralize } from '../lib/format';
+import { MODULE } from '../site.config';
+
+interface Props {
+  doc: DocInfo;
+  /** Affiche le lien vers la séance (listes Cours / TD / accueil). */
+  showSeance?: boolean;
+  headingLevel?: 2 | 3;
+  /** Attribut id de l'élément (ancre). */
+  id?: string;
+}
+
+const { doc, showSeance = false, headingLevel = 3, id } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const typeLabel = { cours: 'Cours', td: 'TD', corrige: 'Corrigé' }[doc.type];
+const titleId = `${doc.anchor}-titre`;
+---
+
+<article class="doc-card" id={id} aria-labelledby={titleId} data-chapitre={doc.chapitre}>
+  <div class="doc-card__top">
+    <Badge variant={doc.type}>{typeLabel}</Badge>
+    <span class="doc-card__chap">Chapitre {doc.chapitre}</span>
+  </div>
+
+  <Heading class="doc-card__title" id={titleId}>{doc.label}</Heading>
+  {
+    showSeance ? (
+      <p class="doc-card__seance">
+        <a href={doc.seanceHref}>
+          Séance {doc.seance} : {doc.seanceTitre}
+        </a>
+      </p>
+    ) : (
+      <p class="doc-card__seance">{doc.seanceTitre}</p>
+    )
+  }
+
+  <ul class="doc-card__meta" role="list">
+    <li>
+      <Icon name="calendar" size={16} />
+      <span class="sr-only">Publié le </span>
+      <time datetime={doc.date}>{doc.dateLabel}</time>
+    </li>
+    <li><Icon name="file" size={16} />{pluralize(doc.pages, 'page')}</li>
+    <li><Icon name="download" size={16} /><span class="sr-only">Taille : </span>PDF · {doc.sizeLabel}</li>
+  </ul>
+
+  <div class="doc-card__actions">
+    <Button
+      href={doc.href}
+      variant="primary"
+      icon="external"
+      class="doc-card__open"
+      target="_blank"
+      rel="noopener"
+      aria-label={`Ouvrir ${doc.label} (PDF, nouvel onglet)`}
+    >
+      Ouvrir
+    </Button>
+    <Button
+      href={doc.href}
+      variant="secondary"
+      icon="download"
+      download={doc.downloadName}
+      aria-label={`Télécharger ${doc.label} (PDF, ${doc.sizeLabel})`}
+    >
+      Télécharger
+    </Button>
+    <Button
+      variant="secondary"
+      icon="share"
+      data-share
+      data-share-url={doc.shareUrl}
+      data-share-title={`${doc.label} — ${MODULE.nom}`}
+      data-share-text={`${doc.label} : ${doc.seanceTitre}`}
+      aria-label={`Partager le lien de ${doc.label}`}
+    >
+      Partager
+    </Button>
+  </div>
+</article>
+
+<style>
+  .doc-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.125rem;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+    container: doc-card / inline-size;
+  }
+  .doc-card:target {
+    border-color: var(--accent);
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent),
+      var(--shadow-md);
+  }
+  @media (min-width: 48rem) {
+    .doc-card {
+      padding: 1.375rem;
+    }
+  }
+  .doc-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .doc-card__chap {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+  .doc-card__title {
+    font-size: 1.25rem;
+    margin-top: 0.25rem;
+  }
+  .doc-card__seance {
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+  .doc-card__seance a {
+    color: var(--link);
+  }
+  .doc-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .doc-card__meta li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .doc-card__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
+  }
+  .doc-card__actions :global(.doc-card__open) {
+    grid-column: 1 / -1;
+  }
+  @container doc-card (min-width: 24rem) {
+    .doc-card__actions {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .doc-card__actions :global(.doc-card__open) {
+      grid-column: auto;
+    }
+  }
+  .doc-card__actions :global(.btn) {
+    padding-inline: 0.5rem;
+  }
+</style>
