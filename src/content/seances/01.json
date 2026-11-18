@@ -3,6 +3,21 @@
   "chapitre": 1,
   "titre": "Définitions et caractérisations de l'entreprise",
   "resume": "Présentation du module, besoins du développeur, types d'organisations, l'entreprise et son environnement, éléments et relations d'une organisation, introduction à la conception (Merise, UML).",
-  "motsCles": ["organisation", "entreprise", "environnement"],
-  "documents": []
+  "motsCles": [
+    "organisation",
+    "entreprise",
+    "environnement"
+  ],
+  "documents": [
+    {
+      "type": "cours",
+      "fichier": "seance-01/cours-01.pdf",
+      "date": "2026-11-14"
+    },
+    {
+      "type": "td",
+      "fichier": "seance-01/td-01.pdf",
+      "date": "2026-11-14"
+    }
+  ]
 }
