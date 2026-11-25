@@ -3,6 +3,17 @@
   "chapitre": 1,
   "titre": "Approche systémique des organisations, système d'information et diagramme de flux",
   "resume": "Les trois systèmes, le système de décision (niveaux, méthodes, tables de décision), aspects fonctionnels et structurels du SI (station, poste de travail, flux, documents), le diagramme de flux.",
-  "motsCles": ["approche systémique", "système de décision", "tables de décision", "diagramme de flux"],
-  "documents": []
+  "motsCles": [
+    "approche systémique",
+    "système de décision",
+    "tables de décision",
+    "diagramme de flux"
+  ],
+  "documents": [
+    {
+      "type": "cours",
+      "fichier": "seance-02/cours-02.pdf",
+      "date": "2026-11-25"
+    }
+  ]
 }
